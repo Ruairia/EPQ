@@ -63,10 +63,19 @@ namespace raycaster
             y /= magnitude;
             return *this;
         }
+
+        inline Vector2D truncate()
+        {
+            return {std::trunc(x), std::trunc(y)};
+        }
+
     };
 
     inline Vector2D operator*(const float scalar, const Vector2D& v) {
         return {v.x * scalar, v.y * scalar};
     }
+
+
+
 }
 #endif //VECTOR2D_H
