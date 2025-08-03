@@ -62,7 +62,9 @@ int main(){
 
 
 
-        ClearBackground(BLACK);
+        // ClearBackground(BLACK);
+        DrawRectangle(0, 0, screenWidth, screenHeight/2, SKYBLUE);
+        DrawRectangle(0, screenHeight/2, screenWidth, screenHeight/2, DARKGREEN);
 
         for (int ScreenX = 0; ScreenX < screenWidth; ScreenX++) //Start of ray cast loop
         {
@@ -111,7 +113,7 @@ int main(){
                     mapPosition.y += step.y;
                     side=1;
                 }
-                    hit = (map[static_cast<int>(mapPosition.y)][static_cast<int>(mapPosition.x)] != 0);
+                hit = (map[static_cast<int>(mapPosition.y)][static_cast<int>(mapPosition.x)] != 0);
             }
 
             double perpendicularDistance;
@@ -124,15 +126,21 @@ int main(){
                 perpendicularDistance = (mapPosition.y - playerPosition.y + (1 - step.y) / 2) / rayDirection.y;
             }
 
-        int lineHeight = (int)(screenHeight / perpendicularDistance);
-        int drawStart = -lineHeight / 2 + screenHeight / 2;
-        if(drawStart < 0) drawStart = 0;
-        int drawEnd = lineHeight / 2 + screenHeight / 2;
-        if(drawEnd >= screenHeight) drawEnd = screenHeight - 1;
-        DrawRectangle(ScreenX, drawStart, 1, drawEnd - drawStart, RAYWHITE);
-
-
-        }
+            const int lineHeight = static_cast<int>(screenHeight / perpendicularDistance);
+            int drawStart = -lineHeight / 2 + screenHeight / 2;
+            if(drawStart < 0)
+            {
+                drawStart = 0;
+            }
+            int drawEnd = lineHeight / 2 + screenHeight / 2;
+            if(drawEnd >= screenHeight)
+            {
+                drawEnd = screenHeight - 1;
+            }
+                auto colour = RAYWHITE;
+            if (side == 0) colour = ColorBrightness(colour, -0.05*perpendicularDistance+0.05);
+            else colour = ColorBrightness(colour, -0.05*perpendicularDistance);
+            DrawRectangle(ScreenX, drawStart, 1, drawEnd - drawStart, colour);}
 
         previousTime = currentTime;
         EndDrawing();
