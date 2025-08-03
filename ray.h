@@ -10,22 +10,42 @@ namespace raycaster
 {
     class Ray {
     public:
-        Ray(const Vector2D origin, const Vector2D direction, const Vector2D position,
-            const Vector2D rayPathDistanceForGridStep, const Vector2D rayCumulativeDistance, const Vector2D step)
+        Ray() = default;
+        Ray(Vector2D origin, Vector2D direction)
         {
-            this->origin = origin;
+            this->position = origin.floor();
             this->direction = direction;
-            this->position = position;
-            this->rayPathDistanceForGridStep = rayPathDistanceForGridStep;
-            this->rayCumulativeDistance = rayCumulativeDistance;
-            this->step = step;
+
+            pathDistanceForGridStep.x = (direction.x == 0) ? 1e30 : abs(1 / direction.x);
+            pathDistanceForGridStep.y = (direction.y == 0) ? 1e30 : abs(1 / direction.y);
+            if (direction.x<0)
+            {
+                step.x = -1;
+                cumulativeDistance.x = (origin.x - position.x) * pathDistanceForGridStep.x;
+            }
+            else
+            {
+                step.x = 1;
+                cumulativeDistance.x = (position.x + 1 - origin.x) * pathDistanceForGridStep.x;
+            }
+            if (direction.y<0)
+            {
+                step.y = -1;
+                cumulativeDistance.y = (origin.y - position.y) * pathDistanceForGridStep.y;
+            }
+            else
+            {
+                step.y = 1;
+                cumulativeDistance.y = (position.y + 1 - origin.y) * pathDistanceForGridStep.y;
+            }
         }
         Vector2D origin;
         Vector2D direction;
-        Vector2D position;
-        Vector2D rayPathDistanceForGridStep;
-        Vector2D rayCumulativeDistance;
+        Vector2D pathDistanceForGridStep;
+        Vector2D cumulativeDistance;
         Vector2D step;
+        Vector2D position;
+        Vector2D mapPosition;
     };
 }
 #endif //RAY_H

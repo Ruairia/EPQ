@@ -10,6 +10,7 @@ namespace raycaster
 {
     class Vector2D {
     public:
+        Vector2D() = default;
         double x;
         double y;
         Vector2D(double x, double y){
@@ -64,9 +65,9 @@ namespace raycaster
             return *this;
         }
 
-        inline Vector2D truncate() const
+        inline Vector2D floor() const
         {
-            return {std::trunc(x), std::trunc(y)};
+            return {std::floor(x), std::floor(y)};
         }
 
     };
