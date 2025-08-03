@@ -26,8 +26,8 @@ int main(){
     Vector2D playerPosition {1.4,2.3};
     Vector2D playerDirection {1,0};
     Vector2D cameraPlane {0,-2};
-    const float moveSpeed = 0.1; //squares per second
-    const float turnSpeed = 0.2; //radians per second
+    const float moveSpeed = 1; //squares per second
+    const float turnSpeed = 0.1; //radians per second
     double previousTime=GetTime();
     double currentTime {0};
     double seconds_elapsed {0};
@@ -84,7 +84,7 @@ int main(){
                 step.x = 1;
                 sideDist.x = (mapPosition.x + 1 - playerPosition.x) * deltaDist.x;
             }
-            if (deltaDist.y<0)
+            if (rayDirection.y<0)
             {
                 step.y = -1;
                 sideDist.y = (playerPosition.y - mapPosition.y) * deltaDist.y;
@@ -111,20 +111,26 @@ int main(){
                     mapPosition.y += step.y;
                     side=1;
                 }
-                    hit = (map[static_cast<int>(mapPosition.y)][static_cast<int>(mapPosition.x)] == 1);
+                    hit = (map[static_cast<int>(mapPosition.y)][static_cast<int>(mapPosition.x)] != 0);
             }
 
             double perpendicularDistance;
             if (side == 0)
             {
-                perpendicularDistance = (mapPosition.x - playerPosition.x);
-                DrawRectangle(ScreenX, (screenHeight-1/perpendicularDistance)/2, 1, 2/perpendicularDistance, RAYWHITE);
+                perpendicularDistance = (mapPosition.x - playerPosition.x + (1 - step.x) / 2) / rayDirection.x;
             }
             else
             {
-                perpendicularDistance = (mapPosition.y - playerPosition.y);
-                DrawRectangle(ScreenX, (screenHeight-1/perpendicularDistance)/2, 1, 2/perpendicularDistance, RAYWHITE);
+                perpendicularDistance = (mapPosition.y - playerPosition.y + (1 - step.y) / 2) / rayDirection.y;
             }
+
+        int lineHeight = (int)(screenHeight / perpendicularDistance);
+        int drawStart = -lineHeight / 2 + screenHeight / 2;
+        if(drawStart < 0) drawStart = 0;
+        int drawEnd = lineHeight / 2 + screenHeight / 2;
+        if(drawEnd >= screenHeight) drawEnd = screenHeight - 1;
+        DrawRectangle(ScreenX, drawStart, 1, drawEnd - drawStart, RAYWHITE);
+
 
         }
 
