@@ -1,0 +1,31 @@
+//
+// Created by ruairi on 03/08/2025.
+//
+
+#ifndef MAP_H
+#define MAP_H
+
+namespace raycaster {
+
+class Map {
+public:
+    static constexpr int map[10][10] = {
+        {1,1,1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,1,0,0,1},
+        {1,0,0,0,0,0,1,0,0,1},
+        {1,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,2,2,2,0,0,1},
+        {1,0,0,0,2,0,0,0,0,1},
+        {1,0,0,0,2,2,0,0,0,1},
+        {1,0,0,0,2,0,0,0,0,1},
+        {1,0,0,0,2,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1,1,1}
+    };
+    static int getSquare(int x, int y) {
+        return map[y][x];
+    }
+};
+
+} // raycaster
+
+#endif //MAP_H

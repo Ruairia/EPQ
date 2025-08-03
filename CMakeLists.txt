@@ -13,7 +13,11 @@ include_directories(${RAYLIB_DIR}/raylib/src)
 link_directories(${RAYLIB_DIR}/raylib/src)
 
 add_executable(raycaster main.cpp
-        Vector2D.h)
+        Vector2D.h
+        player.cpp
+        player.h
+        Map.h
+        ray.h)
 add_executable(raylib_test raylib_test.cpp raylib_test.h
         raylib_test.cpp
         raylib_test.h)

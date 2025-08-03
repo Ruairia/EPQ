@@ -2,32 +2,24 @@
 #include <cmath>
 #include <raylib.h>
 
-#define TARGETFPS 60
+#include "Player.h"
+#include "Map.h"
+
 using namespace raycaster;
 constexpr int screenWidth = 800;
 constexpr int screenHeight = 600;
-constexpr int map[10][10] = {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,1,1,0,1},
-    {1,0,0,0,0,0,0,1,0,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,2,2,2,0,0,1},
-    {1,0,0,0,2,0,0,0,0,1},
-    {1,0,0,0,2,2,0,0,0,1},
-    {1,0,0,0,2,0,0,0,0,1},
-    {1,0,0,0,2,0,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1}
-};
+constexpr float moveSpeed = 1; //squares per second
+constexpr float turnSpeed = 0.5; //radians per second
+
+
+
+
 
 int main(){
-
     InitWindow(screenWidth, screenHeight, "Raycaster");
-    SetTargetFPS(TARGETFPS);
-    Vector2D playerPosition {1.4,2.3};
-    Vector2D playerDirection {1,0};
-    Vector2D cameraPlane {0,-2};
-    const float moveSpeed = 1; //squares per second
-    const float turnSpeed = 0.1; //radians per second
+    SetTargetFPS(60);
+    auto player = Player({1.5,1.5}, {1,0}, {0,-1});
+
     double previousTime=GetTime();
     double currentTime {0};
     double seconds_elapsed {0};
@@ -37,27 +29,7 @@ int main(){
         currentTime = GetTime();
         seconds_elapsed = (currentTime - previousTime);
 
-        if (IsKeyDown(KEY_W))
-        {
-            playerPosition += playerDirection * moveSpeed * seconds_elapsed;
-        }
-
-        if (IsKeyDown(KEY_S))
-        {
-            playerPosition -= playerDirection * moveSpeed * seconds_elapsed;
-        }
-
-        if (IsKeyDown(KEY_D))
-        {
-            playerDirection.rotate(-turnSpeed);
-            cameraPlane.rotate(-turnSpeed);
-        }
-
-        if (IsKeyDown(KEY_A))
-        {
-            playerDirection.rotate(turnSpeed);
-            cameraPlane.rotate(turnSpeed);
-        }
+        player.handleMovement(moveSpeed, turnSpeed, seconds_elapsed);
 
 
 
@@ -68,71 +40,70 @@ int main(){
 
         for (int ScreenX = 0; ScreenX < screenWidth; ScreenX++) //Start of ray cast loop
         {
-            Vector2D rayDirection = playerDirection + cameraPlane * (static_cast<float>(ScreenX) / screenWidth - 0.5f);
-            rayDirection.normalise();
-            Vector2D mapPosition = playerPosition.truncate();
-            Vector2D deltaDist = {0,0};
-            Vector2D sideDist = {0,0};
-            deltaDist.x = (rayDirection.x == 0) ? 1e30 : abs(1 / rayDirection.x);
-            deltaDist.y = (rayDirection.y == 0) ? 1e30 : abs(1 / rayDirection.y);
+            Vector2D rayDirection = player.direction + player.cameraPlane * (static_cast<float>(ScreenX) / screenWidth - 0.5f);
+            Vector2D mapPosition = player.position.truncate();
+            Vector2D rayPathDistanceForGridStep = {0,0};
+            Vector2D rayCumulativeDistance = {0,0};
+            rayPathDistanceForGridStep.x = (rayDirection.x == 0) ? 1e30 : abs(1 / rayDirection.x);
+            rayPathDistanceForGridStep.y = (rayDirection.y == 0) ? 1e30 : abs(1 / rayDirection.y);
             Vector2D step = {0,0};
             if (rayDirection.x<0)
             {
                 step.x = -1;
-                sideDist.x = (playerPosition.x - mapPosition.x) * deltaDist.x;
+                rayCumulativeDistance.x = (player.position.x - mapPosition.x) * rayPathDistanceForGridStep.x;
             }
             else
             {
                 step.x = 1;
-                sideDist.x = (mapPosition.x + 1 - playerPosition.x) * deltaDist.x;
+                rayCumulativeDistance.x = (mapPosition.x + 1 - player.position.x) * rayPathDistanceForGridStep.x;
             }
             if (rayDirection.y<0)
             {
                 step.y = -1;
-                sideDist.y = (playerPosition.y - mapPosition.y) * deltaDist.y;
+                rayCumulativeDistance.y = (player.position.y - mapPosition.y) * rayPathDistanceForGridStep.y;
             }
             else
             {
                 step.y = 1;
-                sideDist.y = (mapPosition.y + 1 - playerPosition.y) * deltaDist.y;
+                rayCumulativeDistance.y = (mapPosition.y + 1 - player.position.y) * rayPathDistanceForGridStep.y;
             }
 
             bool hit = false;
             int side;
             while (!hit)
             {
-                if (sideDist.x < sideDist.y)
+                if (rayCumulativeDistance.x < rayCumulativeDistance.y)
                 {
-                    sideDist.x += deltaDist.x;
+                    rayCumulativeDistance.x += rayPathDistanceForGridStep.x;
                     mapPosition.x += step.x;
                     side=0;
                 }
                 else
                 {
-                    sideDist.y += deltaDist.y;
+                    rayCumulativeDistance.y += rayPathDistanceForGridStep.y;
                     mapPosition.y += step.y;
                     side=1;
                 }
-                hit = (map[static_cast<int>(mapPosition.y)][static_cast<int>(mapPosition.x)] != 0);
+                hit = (Map::getSquare(mapPosition.x,mapPosition.y) != 0);
             }
 
             double perpendicularDistance;
             if (side == 0)
             {
-                perpendicularDistance = (mapPosition.x - playerPosition.x + (1 - step.x) / 2) / rayDirection.x;
+                perpendicularDistance = (mapPosition.x - player.position.x + (1 - step.x) / 2) / rayDirection.x;
             }
             else
             {
-                perpendicularDistance = (mapPosition.y - playerPosition.y + (1 - step.y) / 2) / rayDirection.y;
+                perpendicularDistance = (mapPosition.y - player.position.y + (1 - step.y) / 2) / rayDirection.y;
             }
 
-            const int lineHeight = static_cast<int>(screenHeight / perpendicularDistance);
-            int drawStart = -lineHeight / 2 + screenHeight / 2;
+            const int lineHeight = static_cast<int>(std::round(screenHeight / perpendicularDistance));
+            int drawStart = std::round( -lineHeight / 2 + screenHeight / 2);
             if(drawStart < 0)
             {
                 drawStart = 0;
             }
-            int drawEnd = lineHeight / 2 + screenHeight / 2;
+            int drawEnd = std::round(lineHeight / 2 + screenHeight / 2);
             if(drawEnd >= screenHeight)
             {
                 drawEnd = screenHeight - 1;
@@ -150,3 +121,5 @@ int main(){
 CloseWindow();
     return 0;
 }
+
+
