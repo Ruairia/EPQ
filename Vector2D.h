@@ -58,13 +58,13 @@ namespace raycaster
         }
 
         Vector2D& normalise(){
-            const double magnitude = magnitude();
-            x /= magnitude;
-            y /= magnitude;
+            const double length = magnitude();
+            x /= length;
+            y /= length;
             return *this;
         }
 
-        inline Vector2D truncate()
+        inline Vector2D truncate() const
         {
             return {std::trunc(x), std::trunc(y)};
         }
