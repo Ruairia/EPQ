@@ -8,7 +8,7 @@
 
 namespace raycaster {
 
-    Player::Player(const Vector2D position, const Vector2D direction, const Vector2D cameraPlane)
+    Player::Player(const Vector2D& position, const Vector2D& direction, const Vector2D& cameraPlane)
     : position(position), direction(direction), cameraPlane(cameraPlane) {}
 
 void Player::move(const Vector2D& movement) {

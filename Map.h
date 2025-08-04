@@ -24,6 +24,16 @@ public:
     static int getSquare(int x, int y) {
         return map[y][x];
     }
+
+    static bool hasSquare(int x, int y) {
+        bool returnValue;
+        if (x>=0 && x<=9 && y>=0 && y<=9)
+        {
+            returnValue = true;
+        }
+        else returnValue = false;
+        return returnValue;
+    }
 };
 
 } // raycaster

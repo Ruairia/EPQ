@@ -10,23 +10,32 @@ namespace raycaster
 {
     class Vector2D {
     public:
-        Vector2D() = default;
+
         double x;
         double y;
+        Vector2D() = default;
+
+        Vector2D(const Vector2D& vec)
+        {
+            x = vec.x;
+            y = vec.y;
+        }
+
         Vector2D(double x, double y){
             this->x = x;
             this->y = y;
         };
-        double magnitude() const{
-            return sqrt(pow(x, 2) + pow(y, 2));
+
+        [[nodiscard]] double magnitude() const{
+            return sqrt(pow(static_cast<double>(x), 2) + pow(static_cast<double>(y), 2));
         };
 
         //Operator Overloading
-        Vector2D operator+(const Vector2D other) const{
+        Vector2D operator+(const Vector2D& other) const{
             return {x + other.x, y + other.y};
         }
 
-        Vector2D operator-(const Vector2D other) const{
+        Vector2D operator-(const Vector2D& other) const{
             return {x - other.x, y - other.y};
         }
 
@@ -65,7 +74,7 @@ namespace raycaster
             return *this;
         }
 
-        inline Vector2D floor() const
+        [[nodiscard]] inline Vector2D floor() const
         {
             return {std::floor(x), std::floor(y)};
         }
@@ -74,6 +83,11 @@ namespace raycaster
 
     inline Vector2D operator*(const float scalar, const Vector2D& v) {
         return {v.x * scalar, v.y * scalar};
+    }
+
+    static inline double dot(const Vector2D& a, const Vector2D& b)
+    {
+        return a.x * b.x + a.y * b.y;
     }
 
 

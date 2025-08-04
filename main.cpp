@@ -1,5 +1,7 @@
 #include "Vector2D.h"
 #include <cmath>
+#include <iostream>
+#include <ostream>
 #include <raylib.h>
 
 #include "Player.h"
@@ -18,82 +20,86 @@ void drawWall(int side, int screenX, double distance, int material);
 int main(){
     InitWindow(screenWidth, screenHeight, "Raycaster");
     SetTargetFPS(60);
-    auto player = Player({1.5,1.5}, {1,0}, {0,-1});
+auto player = Player({3,3},{1,0},{0,1.32});
 
     double previousTime=GetTime();
     double currentTime {0};
     double seconds_elapsed {0};
+
     while (!WindowShouldClose())
     {
-        BeginDrawing();
         currentTime = GetTime();
-        seconds_elapsed = (currentTime - previousTime);
-
+        seconds_elapsed = currentTime - previousTime;
+        previousTime = currentTime;
 
         player.handleMovement(moveSpeed, turnSpeed, seconds_elapsed);
 
-        // Draw Ground and Sky;
+        BeginDrawing();
         DrawRectangle(0, 0, screenWidth, screenHeight/2, SKYBLUE);
         DrawRectangle(0, screenHeight/2, screenWidth, screenHeight/2, DARKGREEN);
 
-        for (int ScreenX = 0; ScreenX < screenWidth; ScreenX++) //Start of ray cast loop
+        for (int screenX  {0}; screenX < screenWidth; screenX++)
         {
-            Vector2D rayDirection = player.direction + player.cameraPlane * (static_cast<float>(ScreenX) / screenWidth - 0.5f);
+            std::cout << "Ray casted at " << screenX << std::endl;
+            int  cameraX =
+                (-0.5 + (static_cast<float>(screenX) / static_cast<float>(screenWidth)));
+            Vector2D rayDirection = player.direction + player.cameraPlane * cameraX;
             auto ray = raycaster::Ray(player.position, rayDirection);
-            bool hit = false;
-            int side=1;
-            while (!hit) //DDA loop
+
+
+            int hit=0;
+            int side=0;
+            while (hit == 0 && Map::hasSquare(ray.mapPosition.x, ray.mapPosition.y))
             {
-                if (ray.cumulativeDistance.x < ray.cumulativeDistance.y)
+                if (ray.sideDist.x<ray.sideDist.y)
                 {
-                    ray.cumulativeDistance.x += ray.pathDistanceForGridStep.x;
-                    ray.position.x += ray.step.x;
+                    ray.sideDist.x += ray.pathDistanceForGridStep.x;
+                    ray.mapPosition.x += ray.step.x;
                     side=0;
                 }
+
                 else
                 {
-                    ray.cumulativeDistance.y += ray.pathDistanceForGridStep.y;
-                    ray.position.y += ray.step.y;
+                    ray.sideDist.y += ray.pathDistanceForGridStep.y;
+                    ray.mapPosition.y += ray.step.y;
                     side=1;
                 }
-                hit = (Map::getSquare(ray.position.x, ray.position.y) != 0);
-            }
-            double distance;
-            if (side == 0)
-            {
-                distance = abs((ray.position.x - ray.origin.x + (1 - ray.step.x) / 2) / ray.direction.x);
-            }
-            else
-            {
-                distance = abs((ray.position.y - ray.origin.y + (1 - ray.step.y) / 2) / ray.direction.y);
-            }
 
-            drawWall(side, ScreenX, distance, Map::getSquare(ray.position.x,ray.position.y));
+                hit = Map::getSquare(ray.mapPosition.x, ray.mapPosition.y);
+
+            }
+            std::cout << "Hit " << hit << " at " << ray.mapPosition.x << ", " << ray.mapPosition.y << std::endl;
+            const double perpendicularDistance =  raycaster::dot(player.direction, ray.direction) *
+                (ray.mapPosition - ray.origin).magnitude() - player.direction.magnitude();
+
+            drawWall(side, screenX, perpendicularDistance, hit);
+            EndDrawing();
         }
 
-        previousTime = currentTime;
-        EndDrawing();
     }
 
 
-CloseWindow();
+    CloseWindow();
     return 0;
 }
 
-void drawWall(const int side, const int screenX, const double distance, int material) {
-    const int lineHeight = static_cast<int>(std::round(screenHeight / distance));
-    int drawStart = std::floor(-lineHeight / 2 + screenHeight / 2);
-    if(drawStart < 0) {
-        drawStart = 0;
-    }
-    int drawEnd = std::round(lineHeight / 2 + screenHeight / 2);
-    if(drawEnd >= screenHeight) {
-        drawEnd = screenHeight - 1;
-    }
-    auto colour = MAROON;
-    if (material==1) colour = WHITE;
+void drawWall(int side, int screenX, double distance, int hit) {
+    if (distance <= 0) return;  // Avoid division by zero
 
-    if (side == 0) colour = ColorBrightness(colour, -0.05*distance+0.05);
-    else colour = ColorBrightness(colour, -0.05*distance);
-    DrawRectangle(screenX, drawStart, 1, drawEnd - drawStart, colour);
+    Color material;
+    switch (hit) {
+        case 1: material = RED; break;
+        case 2: material = GREEN; break;
+        case 3: material = BLUE; break;
+        default: material = WHITE; break;
+    }
+
+    int wallHeight = static_cast<int>(screenHeight / distance);
+    // Clamp wall height to prevent excessive values
+    wallHeight = std::min(wallHeight, screenHeight * 2);
+
+    const int drawStart = std::max(0, (screenHeight - wallHeight) / 2);
+    const int drawHeight = std::min(wallHeight, screenHeight - drawStart);
+
+    DrawRectangle(screenX, drawStart, 1, drawHeight, material);
 }

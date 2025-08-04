@@ -11,41 +11,45 @@ namespace raycaster
     class Ray {
     public:
         Ray() = default;
-        Ray(Vector2D origin, Vector2D direction)
+        Ray(const Vector2D& origin, const Vector2D& direction)
         {
-            this->position = origin.floor();
+            this->origin = origin;
             this->direction = direction;
+            this->direction.normalise();
+            mapPosition = origin.floor();
 
-            pathDistanceForGridStep.x = (direction.x == 0) ? 1e30 : abs(1 / direction.x);
-            pathDistanceForGridStep.y = (direction.y == 0) ? 1e30 : abs(1 / direction.y);
-            if (direction.x<0)
+            pathDistanceForGridStep.x = (direction.x == 0) ? 1e30 : std::abs(1/direction.x);
+            pathDistanceForGridStep.y = (direction.y == 0) ? 1e30 : std::abs(1/direction.y);
+
+            if (direction.x < 0)
             {
                 step.x = -1;
-                cumulativeDistance.x = (origin.x - position.x) * pathDistanceForGridStep.x;
+                sideDist.x = (origin.x - mapPosition.x) * pathDistanceForGridStep.x;
             }
-            else
+            else if (direction.x > 0)
             {
                 step.x = 1;
-                cumulativeDistance.x = (position.x + 1 - origin.x) * pathDistanceForGridStep.x;
+                sideDist.x = (static_cast<float>(mapPosition.x) + 1.0 - origin.x) * pathDistanceForGridStep.x;
             }
-            if (direction.y<0)
+            if (direction.y < 0)
             {
                 step.y = -1;
-                cumulativeDistance.y = (origin.y - position.y) * pathDistanceForGridStep.y;
+                sideDist.y = (origin.y - static_cast<float>(mapPosition.y)) * pathDistanceForGridStep.y;
             }
-            else
+            else if (direction.y > 0)
             {
                 step.y = 1;
-                cumulativeDistance.y = (position.y + 1 - origin.y) * pathDistanceForGridStep.y;
+                sideDist.y = (static_cast<float>(mapPosition.y) + 1.0 - origin.y) * pathDistanceForGridStep.y;
             }
+
         }
-        Vector2D origin;
-        Vector2D direction;
-        Vector2D pathDistanceForGridStep;
-        Vector2D cumulativeDistance;
-        Vector2D step;
-        Vector2D position;
-        Vector2D mapPosition;
+    public:
+        Vector2D  origin;
+        Vector2D  direction;
+        Vector2D  pathDistanceForGridStep {0,0};
+        Vector2D sideDist;
+        Vector2D  step {0,0};
+        Vector2D  mapPosition;
     };
 }
 #endif //RAY_H

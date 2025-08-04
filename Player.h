@@ -11,13 +11,13 @@ namespace raycaster {
 
 class Player {
 public:
-    Vector2D position;
-    Vector2D direction;
-    Vector2D cameraPlane;
+    Vector2D position {};
+    Vector2D direction {};
+    Vector2D cameraPlane {};
 
-    Player(Vector2D position, Vector2D direction, Vector2D cameraPlane);
     void handleMovement(float moveSpeed, float turnSpeed, double secondsElapsed);
     void move(const Vector2D& movement);
+    Player(const Vector2D& position, const Vector2D& direction, const Vector2D& cameraPlane);
     void rotate(double angleInRadians);
 };
 
