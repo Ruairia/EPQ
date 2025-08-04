@@ -31,11 +31,11 @@ void Player::rotate(double angleInRadians) {
     }
     if (IsKeyDown(KEY_D))
     {
-        rotate(-turnSpeed * secondsElapsed);
+        rotate(turnSpeed * secondsElapsed);
     }
     if (IsKeyDown(KEY_A))
     {
-        rotate(turnSpeed * secondsElapsed);
+        rotate(-turnSpeed * secondsElapsed);
     }
 }
 

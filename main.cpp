@@ -14,8 +14,7 @@ constexpr int screenHeight = 600;
 constexpr float moveSpeed = 1; //squares per second
 constexpr float turnSpeed = 0.5; //radians per second
 
-void drawWall(int side, int screenX, double distance, int material);
-
+void drawWall(int side, int screenX, double distance, int hit);
 
 int main(){
     InitWindow(screenWidth, screenHeight, "Raycaster");
@@ -40,8 +39,7 @@ auto player = Player({3,3},{1,0},{0,1.32});
 
         for (int screenX  {0}; screenX < screenWidth; screenX++)
         {
-            std::cout << "Ray casted at " << screenX << std::endl;
-            int  cameraX =
+            double  cameraX =
                 (-0.5 + (static_cast<float>(screenX) / static_cast<float>(screenWidth)));
             Vector2D rayDirection = player.direction + player.cameraPlane * cameraX;
             auto ray = raycaster::Ray(player.position, rayDirection);
@@ -68,14 +66,15 @@ auto player = Player({3,3},{1,0},{0,1.32});
                 hit = Map::getSquare(ray.mapPosition.x, ray.mapPosition.y);
 
             }
-            std::cout << "Hit " << hit << " at " << ray.mapPosition.x << ", " << ray.mapPosition.y << std::endl;
-            const double perpendicularDistance =  raycaster::dot(player.direction, ray.direction) *
-                (ray.mapPosition - ray.origin).magnitude() - player.direction.magnitude();
+            double perpendicularDistance = 0;
+            if(side == 0) perpendicularDistance = (ray.sideDist.x - ray.pathDistanceForGridStep.x);
+            else          perpendicularDistance = (ray.sideDist.y - ray.pathDistanceForGridStep.y);
+
 
             drawWall(side, screenX, perpendicularDistance, hit);
-            EndDrawing();
-        }
 
+        }
+        EndDrawing();
     }
 
 
@@ -92,6 +91,11 @@ void drawWall(int side, int screenX, double distance, int hit) {
         case 2: material = GREEN; break;
         case 3: material = BLUE; break;
         default: material = WHITE; break;
+    }
+    switch (side)
+    {
+        case 0: material = ColorBrightness(material,-0.01*distance - 0.1);
+        default: material = ColorBrightness(material,-0.01*distance );
     }
 
     int wallHeight = static_cast<int>(screenHeight / distance);
