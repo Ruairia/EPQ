@@ -15,6 +15,7 @@ namespace raycaster
         {
             this->origin = origin;
             this->direction = direction;
+            this->direction.normalise();
             mapPosition = origin.floor();
 
             pathDistanceForGridStep.x = (direction.x == 0) ? 1e30 : std::abs(1/direction.x);

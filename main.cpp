@@ -11,8 +11,8 @@
 using namespace raycaster;
 constexpr int screenWidth = 800;
 constexpr int screenHeight = 600;
-constexpr float moveSpeed = 1; //squares per second
-constexpr float turnSpeed = 0.5; //radians per second
+constexpr float moveSpeed = 2; //squares per second
+constexpr float turnSpeed = 2; //radians per second
 
 void drawWall(int side, int screenX, double distance, int hit);
 
@@ -87,16 +87,16 @@ void drawWall(int side, int screenX, double distance, int hit) {
 
     Color material;
     switch (hit) {
-        case 1: material = RED; break;
-        case 2: material = GREEN; break;
+        case 1: material = WHITE; break;
+        case 2: material = RED; break;
         case 3: material = BLUE; break;
-        default: material = WHITE; break;
+        case 4: material = GREEN; break;
+        default: material = BLACK; break;
     }
-    switch (side)
-    {
-        case 0: material = ColorBrightness(material,-0.01*distance - 0.1);
-        default: material = ColorBrightness(material,-0.01*distance );
-    }
+    if (side == 0)
+        material = ColorBrightness(material, -0.01 * distance - 0.2);
+    else
+        material = ColorBrightness(material, -0.01 * distance);
 
     int wallHeight = static_cast<int>(screenHeight / distance);
     // Clamp wall height to prevent excessive values
