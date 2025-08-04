@@ -11,21 +11,21 @@
 using namespace raycaster;
 constexpr int screenWidth = 800;
 constexpr int screenHeight = 600;
-constexpr float moveSpeed = 2; //squares per second
-constexpr float turnSpeed = 2; //radians per second
+constexpr short moveSpeed = 2; //squares per second
+constexpr short turnSpeed = 2; //radians per second
 
 void drawWall(int side, int screenX, double distance, int hit);
 
 int main(){
     InitWindow(screenWidth, screenHeight, "Raycaster");
-    SetTargetFPS(60);
-auto player = Player({3,3},{1,0},{0,1.32});
+    SetTargetFPS(120);
+    auto player = Player({3,3},{0,-1},{1.32,0});
 
     double previousTime=GetTime();
     double currentTime {0};
     double seconds_elapsed {0};
 
-    while (!WindowShouldClose())
+    while (!WindowShouldClose()) //Game loop
     {
         currentTime = GetTime();
         seconds_elapsed = currentTime - previousTime;
@@ -35,11 +35,18 @@ auto player = Player({3,3},{1,0},{0,1.32});
 
         BeginDrawing();
         DrawRectangle(0, 0, screenWidth, screenHeight/2, SKYBLUE);
-        DrawRectangle(0, screenHeight/2, screenWidth, screenHeight/2, DARKGREEN);
+        for (float y = screenHeight/2; y < screenHeight; y++) {
+            float linearFactor = y/screenHeight;
+            float factor = 0.75*(std::log(linearFactor));
+
+            Color floorColor = ColorBrightness(DARKGREEN, factor);
+            DrawRectangle(0, y, screenWidth, 1, floorColor);
+        }
+
 
         for (int screenX  {0}; screenX < screenWidth; screenX++)
         {
-            double  cameraX =
+            const double  cameraX =
                 (-0.5 + (static_cast<float>(screenX) / static_cast<float>(screenWidth)));
             Vector2D rayDirection = player.direction + player.cameraPlane * cameraX;
             auto ray = raycaster::Ray(player.position, rayDirection);
@@ -74,6 +81,8 @@ auto player = Player({3,3},{1,0},{0,1.32});
             drawWall(side, screenX, perpendicularDistance, hit);
 
         }
+        std::string fps_counter = "FPS: "+std::to_string(GetFPS());
+        DrawText(fps_counter.c_str(), 20, 10, 20, RAYWHITE);
         EndDrawing();
     }
 
@@ -94,9 +103,9 @@ void drawWall(int side, int screenX, double distance, int hit) {
         default: material = BLACK; break;
     }
     if (side == 0)
-        material = ColorBrightness(material, -0.1 * distance - 0.2);
+        material = ColorBrightness(material, -0.1 * sqrt(distance) - 0.2);
     else
-        material = ColorBrightness(material, -0.1 * distance);
+        material = ColorBrightness(material, -0.1 * sqrt(distance));
 
     int wallHeight = static_cast<int>(screenHeight / distance);
     // Clamp wall height to prevent excessive values

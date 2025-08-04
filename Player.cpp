@@ -6,16 +6,22 @@
 
 #include <raylib.h>
 
+#include "Map.h"
+
 namespace raycaster {
 
     Player::Player(const Vector2D& position, const Vector2D& direction, const Vector2D& cameraPlane)
     : position(position), direction(direction), cameraPlane(cameraPlane) {}
 
 void Player::move(const Vector2D& movement) {
-    position += movement;
-}
+        Vector2D next = position + movement;
+        if (Map::getSquare(next.x, next.y)==0)
+        {
+            position = next;
+        }
+    }
 
-void Player::rotate(double angleInRadians) {
+void Player::rotate(const double angleInRadians) {
     direction.rotate(angleInRadians);
     cameraPlane.rotate(angleInRadians);
 }

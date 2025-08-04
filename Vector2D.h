@@ -27,7 +27,7 @@ namespace raycaster
         };
 
         [[nodiscard]] double magnitude() const{
-            return sqrt(pow(static_cast<double>(x), 2) + pow(static_cast<double>(y), 2));
+            return sqrt(pow((x), 2) + pow((y), 2));
         };
 
         //Operator Overloading
@@ -85,7 +85,7 @@ namespace raycaster
         return {v.x * scalar, v.y * scalar};
     }
 
-    static inline double dot(const Vector2D& a, const Vector2D& b)
+    static double dot(const Vector2D& a, const Vector2D& b)
     {
         return a.x * b.x + a.y * b.y;
     }
