@@ -5,8 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Use pkg-config to find raylib
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(RAYLIB REQUIRED raylib)
+if (PkgConfig_FOUND)
+    pkg_check_modules(RAYLIB REQUIRED raylib)
+endif()
 
+if (NOT RAYLIB_LIBRARIES) #Then probably running on windows
+    set(RAYLIB_DIR "C:/raylib")
+endif()
 include_directories(${RAYLIB_INCLUDE_DIRS})
 link_directories(${RAYLIB_LIBRARY_DIRS})
 
