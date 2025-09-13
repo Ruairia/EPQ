@@ -9,8 +9,8 @@
 #include "ray.h"
 
 using namespace raycaster;
-constexpr int screenWidth = 800;
-constexpr int screenHeight = 600;
+ int screenWidth = 800;
+ int screenHeight = 600;
 constexpr short moveSpeed = 2; //squares per second
 constexpr short turnSpeed = 2; //radians per second
 
@@ -18,6 +18,11 @@ void drawWall(int side, int screenX, double distance, int hit);
 
 int main(){
     InitWindow(screenWidth, screenHeight, "Raycaster");
+    screenWidth = GetMonitorWidth(0);
+    screenHeight = GetMonitorHeight(0);
+    SetWindowSize(screenWidth, screenHeight);
+    ToggleFullscreen();
+
     SetTargetFPS(120);
     auto player = Player({3,3},{0,-1},{1.32,0});
 

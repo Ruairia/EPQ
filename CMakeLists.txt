@@ -15,13 +15,14 @@ endif()
 include_directories(${RAYLIB_INCLUDE_DIRS})
 link_directories(${RAYLIB_LIBRARY_DIRS})
 
-add_executable(raycaster main.cpp
+add_executable(raycaster
+        main.cpp
         Vector2D.h
         Player.cpp
         Player.h
         Map.h
         ray.h)
-add_executable(raylib_test raylib_test.cpp raylib_test.h
+add_executable(raylib_test
         raylib_test.cpp
         raylib_test.h)
 
